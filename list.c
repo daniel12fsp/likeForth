@@ -58,6 +58,7 @@ void push(struct type_stack *stack, int value){
 
 }
 
+
 int drop(struct type_stack *stack){
 
 	int value;
@@ -65,7 +66,7 @@ int drop(struct type_stack *stack){
 	stack->top = stack->top->next;
 	stack->top->previous = NULL;
 	value = aux->value;
-	//free(aux);
+	free(aux);
 	return value;
 }
 
@@ -120,18 +121,64 @@ void dup(struct type_stack *stack){
 	push(stack, stack->top->value);
 }
 
+int is_null(struct type_stack *stack){
+
+	return stack==NULL;	
+}
+
+void empty(struct type_stack *stack){
+
+	if(is_null(stack)){
+		push(stack, 1);
+	}else{
+		push(stack, 0);
+	}
+
+}
+
+void rempty(struct type_stack *stack){
+
+	if(is_null(stack)){
+		push(stack, 1);
+	}else{
+		push(stack, 0);
+	}
+
+}
+
+
+int top(struct type_stack *stack){
+
+	if(stack != NULL)
+		return stack->top->value;
+	else
+		//Confirmar com o professor o valor!!!
+		return -1;
+
+}
+
+void r_arroba(struct type_stack *work, struct type_stack *result){
+	
+	int top_value = top(work);
+	push(result, top_value);
+
+}
+
 int main(){
-	struct type_stack *stack = init_stack();
-	push(stack, 6);
-	push(stack, 2);
-	push(stack, 3);
-	push(stack, 4);
-	push(stack, 5);
-	push(stack, 8);
-	print_stack(stack);
-	swap(stack);
-	pick(stack, 3);
-	print_stack(stack);
+
+	struct type_stack *stack_work   = init_stack();
+	struct type_stack *stack_result = init_stack();
+
+	push(stack_work, 6);
+	push(stack_work, 2);
+	push(stack_work, 3);
+	push(stack_work, 4);
+	push(stack_work, 5);
+	push(stack_work, 8);
+	print_stack(stack_work);
+	swap(stack_work);
+	pick(stack_work, 3);
+	print_stack(stack_work);
 	
 	return 0;
 }

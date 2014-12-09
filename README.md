@@ -2,9 +2,9 @@
 
 ##Daniel##
 ###DO###
-* EMPTY - 0
-* REMPTY - 0
-* R@ - 2
+* EMPTY - 0 - OK
+* REMPTY - 0 - OK
+* R@ - 2 -OK
 ###DONE###
 * SWAP - 2 - OK
 * PICK - 3 - OK
