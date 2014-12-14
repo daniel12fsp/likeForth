@@ -3,7 +3,7 @@
 
 struct type_node{
 
-	int value;
+	float value;
 	struct type_node *next;
 	struct type_node *previous;
 
@@ -29,7 +29,7 @@ struct type_stack *init_stack(){
 
 }
 
-void push(struct type_stack *stack, int value){
+void push(struct type_stack *stack, float value){
 
 	/*
 		Adiciona o valor no topo da pilha
@@ -59,9 +59,9 @@ void push(struct type_stack *stack, int value){
 }
 
 
-int drop(struct type_stack *stack){
+float drop(struct type_stack *stack){
 
-	int value;
+	float value;
 	struct type_node *aux = stack->top;
 	stack->top = stack->top->next;
 	stack->top->previous = NULL;
@@ -70,7 +70,7 @@ int drop(struct type_stack *stack){
 	return value;
 }
 
-void pick(struct type_stack *stack, int pick){
+void pick(struct type_stack *stack, float pick){
 	struct type_node *top = stack->top;
 	int i = 0;
 	while(top != NULL){
@@ -89,7 +89,7 @@ void print_stack(struct type_stack *stack){
 	printf("\n");
 	struct type_node *top = stack->top;
 	while(top != NULL){
-		printf(" %d", top->value);
+		printf(" %0.2f", top->value);
 		top = top->next;
 	}
 
@@ -99,7 +99,7 @@ void print_stack_rev(struct type_stack *stack){
 	printf("\n");
 	struct type_node *top = stack->last;
 	while(top != NULL){
-		printf(" %d", top->value);
+		printf(" %0.2f", top->value);
 		top = top->previous;
 	}
 
@@ -110,7 +110,7 @@ void swap(struct type_stack *stack){
 
 	struct type_node *top = stack->top;
 	struct type_node *next = top->next;
-	int aux = top->value;
+	float aux = top->value;
 	top->value = next->value;
 	next->value = aux;
 
@@ -147,7 +147,7 @@ void rempty(struct type_stack *stack){
 }
 
 
-int top(struct type_stack *stack){
+float top(struct type_stack *stack){
 
 	if(stack != NULL)
 		return stack->top->value;
@@ -159,25 +159,27 @@ int top(struct type_stack *stack){
 
 void r_arroba(struct type_stack *work, struct type_stack *result){
 	
-	int top_value = top(work);
+	float top_value = top(work);
 	push(result, top_value);
 
 }
+
+// void srand(struct type_stack *work, 
 
 int main(){
 
 	struct type_stack *stack_work   = init_stack();
 	struct type_stack *stack_result = init_stack();
 
-	push(stack_work, 6);
-	push(stack_work, 2);
-	push(stack_work, 3);
-	push(stack_work, 4);
-	push(stack_work, 5);
-	push(stack_work, 8);
+	push(stack_work, 6.0);
+	push(stack_work, 2.0);
+	push(stack_work, 3.0);
+	push(stack_work, 4.0);
+	push(stack_work, 5.0);
+	push(stack_work, 8.0);
 	print_stack(stack_work);
 	swap(stack_work);
-	pick(stack_work, 3);
+	pick(stack_work, 3.0);
 	print_stack(stack_work);
 	
 	return 0;
