@@ -60,17 +60,80 @@ void push(struct type_stack *stack, float value){
 
 }
 
+/*
+ * Retira e retorna o valor do topo da pilha
+ *
+ * NOTA para os demais desenvolvedores:
+ * Para evitar falhas na remocao, foi adicionado uma condicao
+ * para tratar pilha vazia e outra com a pilha possuindo um unico 
+ * elemento.
+ */
 
 float drop(struct type_stack *stack){
 
 	float value;
 	struct type_node *aux = stack->top;
-	stack->top = stack->top->next;
-	stack->top->previous = NULL;
-	value = aux->value;
-	free(aux);
+        printf("DEBUG excluindo!\n"); 
+        if (stack->top != NULL) {
+                if (stack->top->next != NULL) {
+                        stack->top = stack->top->next;
+                        stack->top->previous = NULL;
+                        value = aux->value;
+                        free(aux);
+                } else {
+                        printf("DEBUG Aqui!\n");
+                        stack->top = NULL;
+                        stack->last = NULL;
+                        value = aux->value;
+                        free(aux);
+                }
+        }
+
 	return value;
 }
+
+/* 
+ * Remove um nodo qualquer dentro da "pilha"
+ */
+
+float remove_node(struct type_node *node, struct type_stack *stack) {
+        float value;
+        struct type_node *aux = node;
+
+        if (aux != NULL) {
+                value = aux->value;
+                printf("DEBUG pilha não nula!\n");
+
+                if (node->previous == NULL) {
+                        printf("DEBUG pilha 1!\n");
+                        node = node->next;
+                        aux->next = NULL;
+                        if (node != NULL)
+                                node->previous = NULL;
+                        stack->top = node;
+
+                } else if (node->next == NULL) {
+                        printf("DEBUG pilha 2!\n");
+                        node = node->previous;
+                        aux->previous = NULL;
+                        if (node != NULL)
+                                node->next = NULL;
+                        stack->last = node;
+
+                } else {
+                        printf("DEBUG pilha 3!\n");
+                        node->previous->next = node->next;
+                        node->next->previous = node->previous;
+                        node->previous = NULL;
+                        node->next = NULL;
+                }
+                
+                free(aux);
+        }
+
+        return value;
+}
+                        
 
 void pick(struct type_stack *stack, float pick){
 	struct type_node *top = stack->top;
@@ -186,6 +249,37 @@ void mv_result_to_work(struct type_stack *result, struct type_stack *work) {
         push(work, value);
 }
 
+void roll(struct type_stack *stack, float times) {
+        
+        int ntimes = (int) ntimes;
+        int i = 0;
+        float value;
+
+        struct type_node *aux = stack->top;
+
+        while (aux != NULL) {
+                if (i == times) {
+                        value = remove_node(aux, stack);
+                        push(stack, value);
+                        break;
+                }
+
+                i++;
+                aux = aux->next;
+        }
+}
+
+void rot(struct type_stack *stack) {
+        float a = drop(stack);
+        float b = drop(stack);
+        float c = drop(stack);
+
+        push(stack, b);
+        push(stack, a);
+        push(stack, c);
+
+}
+
 int main(){
 
 	struct type_stack *stack_work   = init_stack();
@@ -198,12 +292,7 @@ int main(){
 	push(stack_work, 5.0);
 	push(stack_work, 8.0);
 	print_stack(stack_work);
-                srandf();
-        randf(stack_work);
-        mv_work_to_result(stack_work, stack_result);
-        print_stack(stack_result);
-        mv_result_to_work(stack_result, stack_work);
-        print_stack(stack_result);
-
+        rot(stack_work); 
+	print_stack(stack_work);
 	return 0;
 }
