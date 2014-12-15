@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <malloc.h>
+#include <stdlib.h>
+#include <time.h>
 
 struct type_node{
 
@@ -164,7 +166,25 @@ void r_arroba(struct type_stack *work, struct type_stack *result){
 
 }
 
-// void srand(struct type_stack *work, 
+void srandf() {
+     srand(time(NULL));
+}
+
+void randf(struct type_stack *work) {
+        float value = rand() / (float) RAND_MAX;
+        printf("DEBUG Valor: %0.2f\n", value);
+        push(work, value);
+}
+
+void mv_work_to_result(struct type_stack *work, struct type_stack *result) {
+        float value = drop(work);
+        push(result, value);
+}
+
+void mv_result_to_work(struct type_stack *result, struct type_stack *work) {
+        float value = drop(result);
+        push(work, value);
+}
 
 int main(){
 
@@ -178,9 +198,12 @@ int main(){
 	push(stack_work, 5.0);
 	push(stack_work, 8.0);
 	print_stack(stack_work);
-	swap(stack_work);
-	pick(stack_work, 3.0);
-	print_stack(stack_work);
-	
+                srandf();
+        randf(stack_work);
+        mv_work_to_result(stack_work, stack_result);
+        print_stack(stack_result);
+        mv_result_to_work(stack_result, stack_work);
+        print_stack(stack_result);
+
 	return 0;
 }
