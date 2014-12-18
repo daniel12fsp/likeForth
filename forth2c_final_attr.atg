@@ -1,0 +1,124 @@
+COMPILER Forth2c
+
+String code = "";
+public void cabecalho(){
+
+	add("#include <.h>");
+}
+
+public void make_function(String name){
+
+	add("void " + name + "(){");
+}
+
+public void call_function(String name){
+
+	add("void " + name + "();");
+}
+
+public void add(String cmd){
+
+	code = code + cmd + "\n";
+}
+public void unary_operator(String token){
+
+	add("push(" + token + ")");
+}
+
+public void between_operator(String token){
+
+	add("push (pop() " + token + " pop())");
+}
+
+CHARACTERS 
+        letramin = "abcdefghijklmnopqrstuvwxyz".
+        letramai = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".
+        caracter = ANY - "\"".
+        digito = "1234567890".
+
+TOKENS
+        identifFuncao = letramin {letramin | letramai | digito}.
+        numero = ["-"] digito {digito} ["." digito {digito}].
+        string = "\""  caracter {caracter} "\"".
+
+COMMENTS FROM '(' TO ')' NESTED
+
+IGNORE '\n' + '\t' + '\r'
+
+PRODUCTIONS
+
+        Forth2c = 										(. cabecalho(); .)
+		bloco 								
+		{
+			bloco
+		}												(. System.out.print(code); .)
+		. 												
+        bloco = deffuncao | 
+			sequencia 
+			.
+
+
+
+        instrucaoIO =  "." 								(.String tmp = "pop()"; .)
+					[
+					  string							(. tmp = t.val; .)
+					]									(. add("printf("+ tmp +"\n)");.)
+					.
+        opAritmetico_dois = "+" | "-" | "*" | "/" | "%".
+		opAritmetico_um = "SQRT".
+        opLogico_dois = ">" | "<" | "=" | "OR" | "AND".
+        opLogico_um = "NOT" | "EMPTY" | "REMPTY".
+        funcaoForth = "DROP"  
+				| "SWAP"  
+				| "DUP"   
+				| "ROT"   
+				| "PICK"  
+				| "ROLL"  
+				| "SRAND" 
+				| "RAND"  
+				| "CR"	
+				.
+
+		funcaoForth_nomes_obscuros =  ">R"    			(. call_function(">R"); .)
+				| "R>"    					  			(. call_function("R>"); .)
+				| "R@"						  			(. call_function("R@"); .)
+				| "?"						  			(. call_function("?"); .)
+				.
+        deffuncao = ":" identifFuncao 					(. make_function(t.val); .)
+					sequencia {sequencia} 
+					";"									(. add("}"); .)
+					.
+        
+        instrucaoCond = "IF"							(. add("if(pop()) {") ; .)
+		 sequencia {sequencia} [restoCond] 
+		"THEN"											(. add("}"); .)
+		.
+        restoCond =  "ELSE" 							(. add("} else {"); .)
+			sequencia {sequencia}.  
+        
+        instrucaoRep = repBeginUntil | repDoLoop.
+
+		repBeginUntil =	"BEGIN" 							(. add("do {"); .)
+				sequencia {sequencia} 						(. add("}while(pop());"); .)
+				"UNTIL"
+				.
+        repDoLoop =      
+				"DO" 									(. add("for(int i=0; i < pop(); i++) {" );.)
+				sequencia {sequencia} 
+				"LOOP"									(. add("}"); .)
+				.   
+        
+        sequencia =	instrucaoRep 
+				| funcaoForth										(. call_function(t.val); .)									
+				| funcaoForth_nomes_obscuros					
+				| numero 										(. unary_operator(t.val);.)
+				| opAritmetico_dois 							(. between_operator(t.val); .)
+				| opAritmetico_um								(. call_function(t.val); .)
+				| opLogico_dois  								(. between_operator(t.val); .)
+				| opLogico_um  								    (. call_function(t.val); .)
+				| identifFuncao 
+				| instrucaoIO  
+				| instrucaoCond 
+				.
+END Forth2c.
+        
