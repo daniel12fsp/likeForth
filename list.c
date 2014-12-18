@@ -280,19 +280,3 @@ void rot(struct type_stack *stack) {
 
 }
 
-int main(){
-
-	struct type_stack *stack_work   = init_stack();
-	struct type_stack *stack_result = init_stack();
-
-	push(stack_work, 6.0);
-	push(stack_work, 2.0);
-	push(stack_work, 3.0);
-	push(stack_work, 4.0);
-	push(stack_work, 5.0);
-	push(stack_work, 8.0);
-	print_stack(stack_work);
-        rot(stack_work); 
-	print_stack(stack_work);
-	return 0;
-}

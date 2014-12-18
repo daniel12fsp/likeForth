@@ -1,34 +1,54 @@
 COMPILER Forth2c
 
 String code = "";
-public void cabecalho(){
+int i = 0;
+String main = "void main(){";
+String tmp = code;
 
-	add("#include <.h>");
+public String cabecalho(String str){
+
+	str = add(str, "#include <stdio.h>");
+	str = add(str, "#include \"lforth.h\"");
+	str = add(str, "struct type_stack *stack_work; //= init_stack();");
+	str = add(str, "struct type_stack *stack_result; //= init_stack();");		
+	return str;
 }
 
-public void make_function(String name){
+public String make_function(String str, String name){
 
-	add("void " + name + "(){");
+	str = add(str, "void " + name + "() {");
+	return str;
 }
 
-public void call_function(String name){
+public String call_function(String str, String name, String parametros){
 
-	add("void " + name + "();");
+	str = add(str, name + "(" + parametros + ");");
+	return str;
 }
 
-public void add(String cmd){
+public String call_function(String str, String name){
 
-	code = code + cmd + "\n";
-}
-public void unary_operator(String token){
-
-	add("push(" + token + ")");
+	str = add(str, name + "();");
+	return str;
 }
 
-public void between_operator(String token){
-
-	add("push (pop() " + token + " pop())");
+public String add(String str, String cmd){
+	str = str + cmd +"\n";
+	return str;
 }
+
+public String unary_operator(String str, String token){
+
+	str = add(str, "push(stack_work, " + token + ");");
+	return str;
+}
+
+public String between_operator(String str, String token){
+
+	str = add(str, "push (stack_work, pop() " + token + " pop());");
+	return str;
+}
+
 
 CHARACTERS 
         letramin = "abcdefghijklmnopqrstuvwxyz".
@@ -47,78 +67,92 @@ IGNORE '\n' + '\t' + '\r'
 
 PRODUCTIONS
 
-        Forth2c = 										(. cabecalho(); .)
+        Forth2c = 										(.tmp =  cabecalho(tmp); .)
 		bloco 											
-		{
+		{												
 			bloco
-		}												(. System.out.print(code); .)
+		}												(.main =  add(main, "}"); System.out.print(code + main); .)
 		. 												
-        bloco = deffuncao  
-			| 											(. make_function("main"); .)
-				sequencia 
-														(. add("}"); .)
-			.
+
+        bloco = 	deffuncao							
+					|   								(. tmp = ""; .)
+						sequencia						
+														(. main += tmp; .)
+			.								
 
 
-
-        instrucaoIO =  "." 								(.String tmp = "pop()"; .)
+        instrucaoIO =  "." 								(.String tmp1 = "\"%f\", pop()"; .)
 					[
-					  string							(. tmp = t.val; .)
-					]									(. add("printf("+ tmp +"\\n)");.)
+					  string							(. tmp1 = t.val; .)
+					]									(. tmp = add(tmp, "printf(" + tmp1 + ");"); .)
 					.
         opAritmetico_dois = "+" | "-" | "*" | "/" | "%".
 		opAritmetico_um = "SQRT".
-        opLogico_dois = ">" | "<" | "=" | "OR" | "AND".
-        opLogico_um = "NOT" | "EMPTY" | "REMPTY".
-        funcaoForth = "DROP"  
-				| "SWAP"  
-				| "DUP"   
-				| "ROT"   
-				| "PICK"  
-				| "ROLL"  
-				| "SRAND" 
-				| "RAND"  
-				| "CR"	
+        opLogico_dois = ">" | "<". 
+		opLogico_diff = "OR" 							(. tmp = between_operator(tmp, "||" ); .)
+						|"AND"							(. tmp = between_operator(tmp, "&&" ); .)
+						| "="						    (. tmp = between_operator(tmp, "==" ); .)
+						.
+        opLogico_um = "NOT" 							(. tmp =  unary_operator(tmp, "!pop(stack_work)");.)
+					| "EMPTY" 
+					| "REMPTY".
+        funcaoForth = "DROP"							(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)  
+				| "SWAP"  								(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)
+				| "DUP"					   				(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)
+				| "ROT"   								(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)
+				| "PICK"								(. String p = "stack_work, pop()" ; tmp = call_function(tmp, "pick", p); .) 								 
+				| "ROLL" 								(. String p = "stack_work, pop()" ; tmp = call_function(tmp, "roll", p); .) 
+				| "SRAND" 								(. tmp = call_function(tmp, "srandf"); .)
+				| "RAND" 								(. String p = "stack_work" ; tmp = call_function(tmp, "randf", p);  .) 
+				| "CR"									(. tmp = call_function(tmp, t.val.toLowerCase()); .)	
 				.
 
-		funcaoForth_nomes_obscuros =  ">R"    			(. call_function(">R"); .)
-				| "R>"    					  			(. call_function("R>"); .)
-				| "R@"						  			(. call_function("R@"); .)
-				| "?"						  			(. call_function("?"); .)
-				.
-        deffuncao = ":" identifFuncao 					(. make_function(t.val); .)
+        deffuncao = ":"															
+				     identifFuncao 						(. tmp = make_function(tmp, t.val); .)
+														
 					sequencia {sequencia} 
-					";"									(. add("}"); .)
+					";"									(. tmp = add(tmp, "}"); .)
+
+														(. code += tmp; tmp = ""; .)
 					.
+
+		funcaoForth_nomes_obscuros =  ">R"    			(. tmp = add(tmp, "mv_work_to_result(stack_work, stack_result);"); .)
+				| "R>"    					  			(. tmp = add(tmp, "mv_result_to_work(stack_result, stack_work);"); .)
+				| "R@"						  			(. tmp = add(tmp, "r_arroba(stack_work, stack_result)"); .)
+				| "?"						  			(. tmp = add(tmp, "float f; scanf(\"%f\",&f); push(stack_work, f);"); .)
+				.
+
         
-        instrucaoCond = "IF"							(. add("if(pop()) {") ; .)
+        instrucaoCond = "IF"							(. tmp = add(tmp, "if(pop()) {") ; .)
 		 sequencia {sequencia} [restoCond] 
-		"THEN"											(. add("}"); .)
+		"THEN"											(. tmp = add(tmp, "}"); .)
 		.
-        restoCond =  "ELSE" 							(. add("} else {"); .)
+        restoCond =  "ELSE" 							(. tmp = add(tmp, "} else {"); .)
 			sequencia {sequencia}.  
         
         instrucaoRep = repBeginUntil | repDoLoop.
 
-		repBeginUntil =	"BEGIN" 							(. add("do {"); .)
-				sequencia {sequencia} 						(. add("}while(pop());"); .)
+		repBeginUntil =	"BEGIN" 							(. tmp = add(tmp, "do {"); .)
+				sequencia {sequencia} 						(. tmp = add(tmp, "} while(pop());"); .)
 				"UNTIL"
 				.
         repDoLoop =      
-				"DO" 									(. add("for(int i=0; i < pop(); i++) {" );.)
+				"DO" 									(. i++; String var = "i" + (Integer.toString(i)); tmp = add(tmp, "int " + var + "; for("+ var +"=0; "+ var +" < pop(); " + var +"++) {" );.)
 				sequencia {sequencia} 
-				"LOOP"									(. add("}"); .)
+				"LOOP"									(. tmp =  add(tmp, "}"); .)
 				.   
-        
-        sequencia =	instrucaoRep 
-				| funcaoForth									(. call_function(t.val); .)									
+
+        sequencia =	
+				instrucaoRep 	
+				| funcaoForth																		
 				| funcaoForth_nomes_obscuros					
-				| numero 										(. unary_operator(t.val);.)
-				| opAritmetico_dois 							(. between_operator(t.val); .)
-				| opAritmetico_um								(. call_function(t.val); .)
-				| opLogico_dois  								(. between_operator(t.val); .)
-				| opLogico_um  								    (. call_function(t.val); .)
-				| identifFuncao 
+				| numero 										(. tmp =  unary_operator(tmp, t.val);.)
+				| opAritmetico_dois 							(. tmp = between_operator(tmp, t.val); .)
+				| opAritmetico_um								(. tmp =  call_function(tmp, t.val); .)
+				| opLogico_diff
+				| opLogico_dois  								(. tmp = between_operator(tmp, t.val); .)
+				| opLogico_um  								    (. tmp = call_function(tmp, t.val); .)
+				| identifFuncao 								(. tmp = call_function(tmp, t.val); .)
 				| instrucaoIO  
 				| instrucaoCond 
 				.
