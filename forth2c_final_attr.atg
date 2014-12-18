@@ -45,7 +45,7 @@ public String unary_operator(String str, String token){
 
 public String between_operator(String str, String token){
 
-	str = add(str, "push (stack_work, pop() " + token + " pop());");
+	str = add(str, "push (stack_work, drop(stack_work) " + token + " drop(stack_work));");
 	return str;
 }
 
@@ -81,27 +81,31 @@ PRODUCTIONS
 			.								
 
 
-        instrucaoIO =  "." 								(.String tmp1 = "\"%f\", pop()"; .)
+        instrucaoIO =  "." 								(.String tmp1 = "\"%f\", drop(stack_work)"; .)
 					[
 					  string							(. tmp1 = t.val; .)
 					]									(. tmp = add(tmp, "printf(" + tmp1 + ");"); .)
 					.
-        opAritmetico_dois = "+" | "-" | "*" | "/" | "%".
+		//tratar o zero...
+        opAritmetico_dois = "+" | "-" | "*" | "/".
 		opAritmetico_um = "SQRT".
+		opAritmetico_diff = "%" 						(. tmp = add(tmp, "push (stack_work, ((int)drop(stack_work)) % ((int)(drop(stack_work))));"); .)
+							.
         opLogico_dois = ">" | "<". 
 		opLogico_diff = "OR" 							(. tmp = between_operator(tmp, "||" ); .)
 						|"AND"							(. tmp = between_operator(tmp, "&&" ); .)
 						| "="						    (. tmp = between_operator(tmp, "==" ); .)
 						.
-        opLogico_um = "NOT" 							(. tmp =  unary_operator(tmp, "!pop(stack_work)");.)
-					| "EMPTY" 
-					| "REMPTY".
+        opLogico_um = "NOT" 							(. tmp =  add(tmp, "!drop(stack_work);"); .)
+					| "EMPTY" 							(. tmp =  add(tmp, "empty(stack_work);"); .)
+					| "REMPTY"							(. tmp =  add(tmp, "rempty(stack_result);"); .)
+					.
         funcaoForth = "DROP"							(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)  
 				| "SWAP"  								(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)
 				| "DUP"					   				(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)
 				| "ROT"   								(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)
-				| "PICK"								(. String p = "stack_work, pop()" ; tmp = call_function(tmp, "pick", p); .) 								 
-				| "ROLL" 								(. String p = "stack_work, pop()" ; tmp = call_function(tmp, "roll", p); .) 
+				| "PICK"								(. String p = "stack_work, drop(stack_work)" ; tmp = call_function(tmp, "pick", p); .) 								 
+				| "ROLL" 								(. String p = "stack_work, drop(stack_work)" ; tmp = call_function(tmp, "roll", p); .) 
 				| "SRAND" 								(. tmp = call_function(tmp, "srandf"); .)
 				| "RAND" 								(. String p = "stack_work" ; tmp = call_function(tmp, "randf", p);  .) 
 				| "CR"									(. tmp = call_function(tmp, t.val.toLowerCase()); .)	
@@ -123,7 +127,7 @@ PRODUCTIONS
 				.
 
         
-        instrucaoCond = "IF"							(. tmp = add(tmp, "if(pop()) {") ; .)
+        instrucaoCond = "IF"							(. tmp = add(tmp, "if(drop(stack_work)) {") ; .)
 		 sequencia {sequencia} [restoCond] 
 		"THEN"											(. tmp = add(tmp, "}"); .)
 		.
@@ -133,11 +137,11 @@ PRODUCTIONS
         instrucaoRep = repBeginUntil | repDoLoop.
 
 		repBeginUntil =	"BEGIN" 							(. tmp = add(tmp, "do {"); .)
-				sequencia {sequencia} 						(. tmp = add(tmp, "} while(pop());"); .)
+				sequencia {sequencia} 						(. tmp = add(tmp, "} while(drop(stack_work));"); .)
 				"UNTIL"
 				.
         repDoLoop =      
-				"DO" 									(. i++; String var = "i" + (Integer.toString(i)); tmp = add(tmp, "int " + var + "; for("+ var +"=0; "+ var +" < pop(); " + var +"++) {" );.)
+				"DO" 									(. i++; String var = "i" + (Integer.toString(i)); tmp = add(tmp, "int " + var + "; for("+ var +"=0; "+ var +" < drop(stack_work); " + var +"++) {" );.)
 				sequencia {sequencia} 
 				"LOOP"									(. tmp =  add(tmp, "}"); .)
 				.   
@@ -146,12 +150,13 @@ PRODUCTIONS
 				instrucaoRep 	
 				| funcaoForth																		
 				| funcaoForth_nomes_obscuros					
-				| numero 										(. tmp =  unary_operator(tmp, t.val);.)
+				| numero 										
 				| opAritmetico_dois 							(. tmp = between_operator(tmp, t.val); .)
 				| opAritmetico_um								(. tmp =  call_function(tmp, t.val); .)
+				| opAritmetico_diff
 				| opLogico_diff
 				| opLogico_dois  								(. tmp = between_operator(tmp, t.val); .)
-				| opLogico_um  								    (. tmp = call_function(tmp, t.val); .)
+				| opLogico_um  								    
 				| identifFuncao 								(. tmp = call_function(tmp, t.val); .)
 				| instrucaoIO  
 				| instrucaoCond 
