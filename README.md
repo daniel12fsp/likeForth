@@ -13,12 +13,12 @@
 * DUP - 1 - ok
 
 ##Denys##
-* SRAND - 0
-* RAND - 0
-* \>R - 2
-* R> - 2
-* ROLL - 3
-*ROT - 5
+* SRAND - 0 -> OK
+* RAND - 0 -> OK
+* \>R - 2 -> OK
+* R> - 2 -> OK
+* ROLL - 3 -> OK
+*ROT - 5 -> OK
 
 até 7/12/2014 - terminar a biblioteca lforth.h
 até
