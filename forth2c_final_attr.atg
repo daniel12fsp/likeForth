@@ -48,13 +48,15 @@ IGNORE '\n' + '\t' + '\r'
 PRODUCTIONS
 
         Forth2c = 										(. cabecalho(); .)
-		bloco 								
+		bloco 											
 		{
 			bloco
 		}												(. System.out.print(code); .)
 		. 												
-        bloco = deffuncao | 
-			sequencia 
+        bloco = deffuncao  
+			| 											(. make_function("main"); .)
+				sequencia 
+														(. add("}"); .)
 			.
 
 
@@ -62,7 +64,7 @@ PRODUCTIONS
         instrucaoIO =  "." 								(.String tmp = "pop()"; .)
 					[
 					  string							(. tmp = t.val; .)
-					]									(. add("printf("+ tmp +"\n)");.)
+					]									(. add("printf("+ tmp +"\\n)");.)
 					.
         opAritmetico_dois = "+" | "-" | "*" | "/" | "%".
 		opAritmetico_um = "SQRT".
@@ -109,7 +111,7 @@ PRODUCTIONS
 				.   
         
         sequencia =	instrucaoRep 
-				| funcaoForth										(. call_function(t.val); .)									
+				| funcaoForth									(. call_function(t.val); .)									
 				| funcaoForth_nomes_obscuros					
 				| numero 										(. unary_operator(t.val);.)
 				| opAritmetico_dois 							(. between_operator(t.val); .)
