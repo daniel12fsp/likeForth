@@ -273,10 +273,10 @@ void rot(struct type_stack *stack) {
         float a = drop(stack);
         float b = drop(stack);
         float c = drop(stack);
-
-        push(stack, b);
-        push(stack, a);
+		push(stack, a);
         push(stack, c);
+		push(stack, b);
+       
 
 }
 
