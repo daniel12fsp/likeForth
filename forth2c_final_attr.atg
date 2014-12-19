@@ -56,7 +56,7 @@ public String unary_operator(String str, String token){
 
 public String between_operator(String str, String token){
 
-	str = add(str, "push (stack_work, drop(stack_work) " + token + " drop(stack_work));");
+	str = add(str, "i = drop(stack_work); push (stack_work, drop(stack_work) " + token + " i );");
 	return str;
 }
 
