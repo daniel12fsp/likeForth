@@ -2,15 +2,15 @@ COMPILER Forth2c
 
 String code = "";
 int i = 0;
-String main = "void main(){";
+String main = "void main(){\n stack_work = init_stack(); \n stack_result = init_stack(); \n";
 String tmp = code;
 
 public String cabecalho(String str){
 
 	str = add(str, "#include <stdio.h>");
 	str = add(str, "#include \"lforth.h\"");
-	str = add(str, "struct type_stack *stack_work; //= init_stack();");
-	str = add(str, "struct type_stack *stack_result; //= init_stack();");		
+	str = add(str, "struct type_stack *stack_work;");
+	str = add(str, "struct type_stack *stack_result;");		
 	return str;
 }
 
@@ -150,7 +150,7 @@ PRODUCTIONS
 				instrucaoRep 	
 				| funcaoForth																		
 				| funcaoForth_nomes_obscuros					
-				| numero 										
+				| numero 										(. tmp = add(tmp, "push(stack_work, " + t.val + ");"); .)
 				| opAritmetico_dois 							(. tmp = between_operator(tmp, t.val); .)
 				| opAritmetico_um								(. tmp =  call_function(tmp, t.val); .)
 				| opAritmetico_diff

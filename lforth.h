@@ -19,7 +19,7 @@ struct type_stack{
 };
 
 
-struct type_stack *init_stack(){
+struct type_stack* init_stack(){
 	/*	
 		Inicializa o ponteiro para o topo da pilha  e o ultimo da pilha
 	*/
