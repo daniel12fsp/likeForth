@@ -4,10 +4,12 @@ String code = "";
 int i = 0;
 String main = "void main(){\n stack_work = init_stack(); \n stack_result = init_stack(); \n";
 String tmp = code;
+String var = "";
 
 public String cabecalho(String str){
 
 	str = add(str, "#include <stdio.h>");
+	str = add(str, "#include <math.h>");
 	str = add(str, "#include \"lforth.h\"");
 	str = add(str, "struct type_stack *stack_work;");
 	str = add(str, "struct type_stack *stack_result;");		
@@ -88,7 +90,8 @@ PRODUCTIONS
 					.
 		//tratar o zero...
         opAritmetico_dois = "+" | "-" | "*" | "/".
-		opAritmetico_um = "SQRT".
+		opAritmetico_um = "SQRT"						(. tmp = add(tmp, "push (stack_work, sqrt(drop(stack_work))) ;"); .)
+							.
 		opAritmetico_diff = "%" 						(. tmp = add(tmp, "push (stack_work, ((int)drop(stack_work)) % ((int)(drop(stack_work))));"); .)
 							.
         opLogico_dois = ">" | "<". 
@@ -123,7 +126,7 @@ PRODUCTIONS
 		funcaoForth_nomes_obscuros =  ">R"    			(. tmp = add(tmp, "mv_work_to_result(stack_work, stack_result);"); .)
 				| "R>"    					  			(. tmp = add(tmp, "mv_result_to_work(stack_result, stack_work);"); .)
 				| "R@"						  			(. tmp = add(tmp, "r_arroba(stack_work, stack_result)"); .)
-				| "?"						  			(. tmp = add(tmp, "float f; scanf(\"%f\",&f); push(stack_work, f);"); .)
+				| "?"						  			(. i++; var = "i" + (Integer.toString(i)); tmp = add(tmp, "float " + var +"; scanf(\"%f\",&" + var + "); push(stack_work, " + var +");"); .)
 				.
 
         
@@ -141,7 +144,7 @@ PRODUCTIONS
 				"UNTIL"
 				.
         repDoLoop =      
-				"DO" 									(. i++; String var = "i" + (Integer.toString(i)); tmp = add(tmp, "int " + var + "; for("+ var +"=0; "+ var +" < drop(stack_work); " + var +"++) {" );.)
+				"DO" 									(. i++; var = "i" + (Integer.toString(i)); tmp = add(tmp, "int " + var + "; for("+ var +"=0; "+ var +" < drop(stack_work); " + var +"++) {" );.)
 				sequencia {sequencia} 
 				"LOOP"									(. tmp =  add(tmp, "}"); .)
 				.   
@@ -152,7 +155,7 @@ PRODUCTIONS
 				| funcaoForth_nomes_obscuros					
 				| numero 										(. tmp = add(tmp, "push(stack_work, " + t.val + ");"); .)
 				| opAritmetico_dois 							(. tmp = between_operator(tmp, t.val); .)
-				| opAritmetico_um								(. tmp =  call_function(tmp, t.val); .)
+				| opAritmetico_um								
 				| opAritmetico_diff
 				| opLogico_diff
 				| opLogico_dois  								(. tmp = between_operator(tmp, t.val); .)
