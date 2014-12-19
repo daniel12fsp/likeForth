@@ -4,7 +4,9 @@ String code = "";
 int i = 0;
 String main = "void main(){\n stack_work = init_stack(); \n stack_result = init_stack(); \n";
 String tmp = code;
-String var = "";
+String var1 = "";
+String var2 = "";
+String var = "i";
 
 public String cabecalho(String str){
 
@@ -13,8 +15,15 @@ public String cabecalho(String str){
 	str = add(str, "#include \"lforth.h\"");
 	str = add(str, "struct type_stack *stack_work;");
 	str = add(str, "struct type_stack *stack_result;");		
+	str = add(str, "float i;");		
 	return str;
 }
+
+public String variavel(String str){
+
+	return str + (Integer.toString(i));
+}
+
 
 public String make_function(String str, String name){
 
@@ -99,7 +108,7 @@ PRODUCTIONS
 						|"AND"							(. tmp = between_operator(tmp, "&&" ); .)
 						| "="						    (. tmp = between_operator(tmp, "==" ); .)
 						.
-        opLogico_um = "NOT" 							(. tmp =  add(tmp, "!drop(stack_work);"); .)
+        opLogico_um = "NOT" 							(. tmp =  add(tmp, "push(stack_work, !drop(stack_work));"); .)
 					| "EMPTY" 							(. tmp =  add(tmp, "empty(stack_work);"); .)
 					| "REMPTY"							(. tmp =  add(tmp, "rempty(stack_result);"); .)
 					.
@@ -126,7 +135,7 @@ PRODUCTIONS
 		funcaoForth_nomes_obscuros =  ">R"    			(. tmp = add(tmp, "mv_work_to_result(stack_work, stack_result);"); .)
 				| "R>"    					  			(. tmp = add(tmp, "mv_result_to_work(stack_result, stack_work);"); .)
 				| "R@"						  			(. tmp = add(tmp, "r_arroba(stack_work, stack_result)"); .)
-				| "?"						  			(. i++; var = "i" + (Integer.toString(i)); tmp = add(tmp, "float " + var +"; scanf(\"%f\",&" + var + "); push(stack_work, " + var +");"); .)
+				| "?"						  			(. tmp = add(tmp, "scanf(\"%f\",&" + var + "); push(stack_work, " + var +");"); .)
 				.
 
         
@@ -144,7 +153,8 @@ PRODUCTIONS
 				"UNTIL"
 				.
         repDoLoop =      
-				"DO" 									(. i++; var = "i" + (Integer.toString(i)); tmp = add(tmp, "int " + var + "; for("+ var +"=0; "+ var +" < drop(stack_work); " + var +"++) {" );.)
+				"DO" 									(. i++; var1 = variavel("i"); var2 = variavel("j"); .)
+														(. tmp = add(tmp, "int " + var1 + ";" + "float "+ var2 + "=drop(stack_work); for("+ var1 +"=0;"+ var1 + " < " + var2 +";" + var1 +"++) {" );.)
 				sequencia {sequencia} 
 				"LOOP"									(. tmp =  add(tmp, "}"); .)
 				.   
