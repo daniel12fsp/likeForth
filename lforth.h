@@ -73,7 +73,7 @@ float drop(struct type_stack *stack){
 
 	float value;
 	struct type_node *aux = stack->top;
-        printf("DEBUG excluindo!\n"); 
+      
         if (stack->top != NULL) {
                 if (stack->top->next != NULL) {
                         stack->top = stack->top->next;
@@ -81,11 +81,12 @@ float drop(struct type_stack *stack){
                         value = aux->value;
                         free(aux);
                 } else {
-                        printf("DEBUG Aqui!\n");
+                     
                         stack->top = NULL;
                         stack->last = NULL;
                         value = aux->value;
                         free(aux);
+                        stack = NULL;
                 }
         }
 
@@ -188,7 +189,7 @@ void dup(struct type_stack *stack){
 
 int is_null(struct type_stack *stack){
 
-	return stack==NULL;	
+	return stack->top==NULL;	
 }
 
 void empty(struct type_stack *stack){
