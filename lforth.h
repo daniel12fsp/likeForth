@@ -235,7 +235,7 @@ void srandf() {
 }
 
 void randf(struct type_stack *work) {
-        float value = rand() / (float) RAND_MAX;
+        float value = rand() % 53 - 1;
         //printf("DEBUG Valor: %0.2f\n", value);
         push(work, value);
 }
