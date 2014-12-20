@@ -110,7 +110,7 @@ PRODUCTIONS
 						.
         opLogico_um = "NOT" 							(. tmp =  add(tmp, "push(stack_work, !drop(stack_work));"); .)
 					| "EMPTY" 							(. tmp =  add(tmp, "empty(stack_work);"); .)
-					| "REMPTY"							(. tmp =  add(tmp, "rempty(stack_result);"); .)
+					| "REMPTY"							(. tmp =  add(tmp, "rempty(stack_result, stack_work);"); .)
 					.
         funcaoForth = "DROP"							(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)  
 				| "SWAP"  								(. String p = "stack_work"; tmp = call_function(tmp, t.val.toLowerCase(), p); .)

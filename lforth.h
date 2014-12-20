@@ -152,7 +152,7 @@ void pick(struct type_stack *stack, float pick){
 }
 
 void print_stack(struct type_stack *stack){
-	printf("\n");
+	printf("\n#");
 	struct type_node *top = stack->top;
 	while(top != NULL){
 		printf(" %0.2f", top->value);
@@ -202,12 +202,12 @@ void empty(struct type_stack *stack){
 
 }
 
-void rempty(struct type_stack *stack){
+void rempty(struct type_stack *stack, struct type_stack *stack_work){
 
 	if(is_null(stack)){
-		push(stack, 1);
+		push(stack_work, 1);
 	}else{
-		push(stack, 0);
+		push(stack_work, 0);
 	}
 
 }
