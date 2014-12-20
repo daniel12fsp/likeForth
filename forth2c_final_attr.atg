@@ -99,9 +99,9 @@ PRODUCTIONS
 					.
 		//tratar o zero...
         opAritmetico_dois = "+" | "-" | "*" | "/".
-		opAritmetico_um = "SQRT"						(. tmp = add(tmp, "push (stack_work, sqrt(drop(stack_work))) ;"); .)
-							.
-		opAritmetico_diff = "%" 						(. tmp = add(tmp, "push (stack_work, ((int)drop(stack_work)) % ((int)(drop(stack_work))));"); .)
+		opAritmetico_um = "SQRT"						(. tmp = add(tmp, "push(stack_work, sqrt(drop(stack_work))) ;"); .)
+							.							
+		opAritmetico_diff = "%" 						(. tmp = add(tmp, "i = drop(stack_work); push(stack_work, fmodf(drop(stack_work), i));"); .)
 							.
         opLogico_dois = ">" | "<". 
 		opLogico_diff = "OR" 							(. tmp = between_operator(tmp, "||" ); .)
