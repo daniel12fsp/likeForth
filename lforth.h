@@ -103,10 +103,10 @@ float remove_node(struct type_node *node, struct type_stack *stack) {
 
         if (aux != NULL) {
                 value = aux->value;
-                printf("DEBUG pilha não nula!\n");
+                //printf("DEBUG pilha não nula!\n");
 
                 if (node->previous == NULL) {
-                        printf("DEBUG pilha 1!\n");
+                        //printf("DEBUG pilha 1!\n");
                         node = node->next;
                         aux->next = NULL;
                         if (node != NULL)
@@ -114,7 +114,7 @@ float remove_node(struct type_node *node, struct type_stack *stack) {
                         stack->top = node;
 
                 } else if (node->next == NULL) {
-                        printf("DEBUG pilha 2!\n");
+                        //printf("DEBUG pilha 2!\n");
                         node = node->previous;
                         aux->previous = NULL;
                         if (node != NULL)
@@ -122,7 +122,7 @@ float remove_node(struct type_node *node, struct type_stack *stack) {
                         stack->last = node;
 
                 } else {
-                        printf("DEBUG pilha 3!\n");
+                        //printf("DEBUG pilha 3!\n");
                         node->previous->next = node->next;
                         node->next->previous = node->previous;
                         node->previous = NULL;
@@ -235,7 +235,8 @@ void srandf() {
 }
 
 void randf(struct type_stack *work) {
-        float value = rand() % 53 - 1;
+		int top = (int) drop(work);
+        float value = rand() % top + 1;
         //printf("DEBUG Valor: %0.2f\n", value);
         push(work, value);
 }
