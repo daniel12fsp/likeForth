@@ -1,3 +1,8 @@
+import java.io.PrintWriter;
+import java.io.File;
+import java.io.IOException;
+
+
 COMPILER Forth2c
 
 String code = "";
@@ -60,6 +65,17 @@ public String between_operator(String str, String token){
 	return str;
 }
 
+public void write_disk(){
+	try {
+		File file = new File ("codigo_convertido.c");
+		PrintWriter printWriter = new PrintWriter (file);
+		printWriter.println (code + main);
+		printWriter.close ();
+	} catch(IOException i){
+		System.out.print("Arquivo nao criado"); 
+	}
+}
+
 
 CHARACTERS 
         letramin = "abcdefghijklmnopqrstuvwxyz".
@@ -82,7 +98,7 @@ PRODUCTIONS
 		bloco 											
 		{												
 			bloco
-		}												(.main =  add(main, "}"); System.out.print(code + main); .)
+		}												(.main =  add(main, "}");  write_disk(); .)
 		. 												
 
         bloco = 	deffuncao							
