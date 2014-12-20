@@ -149,7 +149,7 @@ PRODUCTIONS
         instrucaoRep = repBeginUntil | repDoLoop.
 
 		repBeginUntil =	"BEGIN" 							(. tmp = add(tmp, "do {"); .)
-				sequencia {sequencia} 						(. tmp = add(tmp, "} while(drop(stack_work));"); .)
+				sequencia {sequencia} 						(. tmp = add(tmp, "} while(!drop(stack_work));"); .)
 				"UNTIL"
 				.
         repDoLoop =      
