@@ -1,0 +1,240 @@
+( *
+
+-- Blackjack, Marco 2014 --
+
+- jogador CONTRA mesa
+- jogador pode tirar quantas cartas quiser, enquanto valor <= 21.
+- mesa começa a jogar quando jogador decide parar ou fizer mais que 21.
+
+O valor das cartas eh:
+
+- seu valor de face para as numéricas.
+- 10 ptos para rei, rainha e valete.
+- Um ás vale 1 ou 11. Em uma mão, todos os ases valem o mesmo.
+  Inicialmente, o valor 11 é usado, mas se isso levar a mais de
+  21 pontos, o valor 1 é usado.
+
+Vence quem fizer o maior numero de pontos <= 21.
+Em caso de estouro de ambos, nao ha vencedor.
+Em caso de empate <= 21, vence a mesa.
+
+----------------------------
+
+* )
+
+(-- DEBUG! exibe pilha --)
+: cpback BEGIN R> REMPTY UNTIL ;
+: sshow BEGIN DUP . ." " >R EMPTY UNTIL CR cpback ;
+
+(-- preenche pilha com valores de TOPO ateh 1 --)
+(-- 5 fill --> ... 5 4 3 2 1, 1 no topo --)
+: fill DUP DO 1 - DUP LOOP DROP ;
+
+(-- embaralha conteudo da pilha --)
+: shuffle 300 DO 52 RAND ROLL LOOP ;
+
+(-- exibe uma carta --)
+(-- naipes = copas, ouro, espada, paus; ranks = As, 2 a 10, K, Q e J --)
+: showCard
+  DUP 13 % DUP
+  0 = IF ."A" 
+  ELSE DUP 1 = IF ."2" 
+    ELSE DUP 2 = IF ."3" 
+      ELSE DUP 3 = IF ."4" 
+        ELSE DUP 4 = IF ."5"
+          ELSE DUP 5 = IF ."6" 
+            ELSE DUP 6 = IF ."7"
+              ELSE DUP 7 = IF ."8" 
+                ELSE DUP 8 = IF ."9" 
+                  ELSE DUP 9 = IF ."10" 
+                    ELSE DUP 10 = IF ."J" 
+                      ELSE DUP 11 = IF ."Q" 
+                        ELSE DUP 12 = IF ."K" THEN
+                        THEN
+                      THEN
+                    THEN
+                  THEN  
+                THEN
+              THEN
+            THEN
+          THEN
+        THEN
+      THEN 
+    THEN   
+  THEN
+  DROP
+  DUP 4 % DUP 
+  0 = IF ."c" DROP
+  ELSE DUP 1 = IF ."o" DROP
+    ELSE DUP 2 = IF ."e" DROP
+      ELSE DUP 3 = IF ."p" DROP ELSE ."*** Erro? " . THEN
+      THEN
+    THEN
+  THEN
+  DROP
+;
+
+(-- mostra baralho --)
+: dequeShow 52 DO DUP showCard ." " >R LOOP CR cpback ;
+
+(-- copia elementos de stack pra rstack [exceto topo] ate achar -1 --)
+(-- [3 -1 4 5 2] e rstack [] --> [3 2] e rstack [5 4] --)
+: torstackWithoutTop
+    BEGIN 
+      SWAP DUP
+      -1 = NOT 
+      IF >R DUP THEN 
+      -1 = 
+    UNTIL  
+;
+
+(-- verifica se carta eh um As --)
+: isAce 13 % 0 = IF 1 ELSE 0 THEN ;
+
+(-- conta numero de Ases na mao (mao eh mantida na rstack) --)
+: aceCount 
+  REMPTY NOT
+  IF
+    -1 0 
+    BEGIN 
+      R> DUP isAce ROT ROT + 
+      REMPTY 
+    UNTIL 
+    torstackWithoutTop
+  THEN  
+;
+
+(-- retorna o nro de pontos de uma carta --)
+: cardPoints 
+  13 % DUP
+  0 = IF DROP 11 
+  ELSE DUP 1 = IF DROP 2 
+    ELSE DUP 2 = IF DROP 3 
+      ELSE DUP 3 = IF DROP 4 
+        ELSE DUP 4 = IF DROP 5
+          ELSE DUP 5 = IF DROP 6 
+            ELSE DUP 6 = IF DROP 7
+              ELSE DUP 7 = IF DROP 8 
+                ELSE DUP 8 = IF DROP 9 
+                  ELSE DUP 9 = IF DROP 10 
+                    ELSE DUP 10 = IF DROP 10 
+                      ELSE DUP 11 = IF DROP 10 
+                        ELSE DUP 12 = IF DROP 10 THEN
+                        THEN
+                      THEN
+                    THEN
+                  THEN  
+                THEN
+              THEN
+            THEN
+          THEN
+        THEN
+      THEN 
+    THEN   
+  THEN
+;
+
+(-- retorna o numero de pontos em uma mao --)
+: handPoints 
+  REMPTY 
+  IF 0
+  ELSE    
+    -1 0 
+    BEGIN 
+      R> DUP cardPoints ROT ROT + 
+      REMPTY 
+    UNTIL
+    torstackWithoutTop
+    ( discount ace values if exceeds 21 )  
+    DUP 21 > IF aceCount 10 * - THEN 
+  THEN
+;
+
+(-- mostra a mao --)
+: showHand 
+  REMPTY NOT
+  IF
+    -1 0 
+    BEGIN 
+      R> DUP showCard ." " SWAP 
+      REMPTY 
+    UNTIL
+    torstackWithoutTop
+    DROP
+  THEN
+;
+
+(-- interacao com jogador --)
+: playerTurn
+  BEGIN 
+    ."Suas cartas: [ " showHand ."] = " handPoints . CR
+    handPoints 21 > 
+    IF 0
+    ELSE
+      ."Quer outra carta? (1 = sim, 0 = nao) " ?
+      DUP 0 = NOT IF
+        SWAP >R
+      THEN
+    THEN
+    0 =
+  UNTIL  
+;
+
+(-- esvazia a pilha de resultados --)
+: emptyRstack BEGIN R> DROP REMPTY UNTIL ;
+
+( -- estrategia da banca eh mt simples. Jogue ate valor obtido > 16 -- )
+: bankTurn
+  handPoints
+  emptyRstack
+  BEGIN
+    SWAP >R 
+    handPoints 16 >   
+  UNTIL  
+  ."Cartas da Mesa: [ " showHand ."] = " handPoints . CR
+;
+
+(-- verifica se jogador foi melhor que banca --)
+: copyTwo 1 PICK 1 PICK ;
+
+: bothGreater21 copyTwo 21 > SWAP 21 > AND ;
+
+: playerBetterThanBank 
+  SWAP        (player bank -- bank player)
+  DUP         (-- bank player player )
+  21 > NOT    (-- bank player [player 21 <=] )
+  ROT         (-- [player 21 <=] bank player )
+  1 PICK      (-- [player 21 <=] bank player bank )
+  21 >        (-- [player 21 <=] bank player [bank 21 >])
+  ROT         (-- [player 21 <=] [bank 21 >] bank player)
+  <           (-- [player 21 <=] [bank 21 >] [bank player <] )
+  OR          (-- [player 21 <=] [bank 21 > OR bank player <] )
+  AND         (-- [{player 21 <=} AND {bank 21 > OR bank player <}] )
+;
+
+(-- BLACKJACK --)
+: blackjack
+  SRAND		  ( inicia a semente aleatoria )
+  52 fill     ( coloca cartas no baralho )
+  shuffle     ( embaralha as cartas )
+
+  ( dequeShow )
+  
+  ."Bem vindo ao jogo de blackjack!" CR
+  playerTurn  ( jogadas do usuario )
+  bankTurn    ( jogadas da banca )
+  
+  ( garante [... player bank] no topo da pilha )
+  handPoints  
+  
+  ( verifica quem venceu o jogo )
+  bothGreater21 
+  IF ."Sem vencedores!" CR
+  ELSE playerBetterThanBank 
+       IF ."Voce venceu, parabens!" CR
+       ELSE ."Voce perdeu!" CR
+       THEN
+  THEN
+;
+
+blackjack
